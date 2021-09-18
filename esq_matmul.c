@@ -1,44 +1,46 @@
+#include "matrix.h"
 #include <stdio.h>
-#include <sys/time.h> 
 #include <stdlib.h>
+#include <sys/time.h>
 
+#define N_SIZES 10
 
+int main() {
+  /* size of matrices to be generated */
+  int sizes[N_SIZES] = {32, 64, 128, 256, 512, 640, 768, 896, 1024, 1536};
+  struct matrix a, b, result;
+  struct timeval startedAt, endedAt;
+  long spentMicroseconds;
+  int i;
 
+  for (i = 0; i < N_SIZES; i++) {
+    /* init matrices with random values */
+    matrixInit(&a, sizes[i], sizes[i]);
+    matrixRandom(&a);
 
+    matrixInit(&b, sizes[i], sizes[i]);
+    matrixRandom(&b);
 
-int main(){
-    
-    /* exemplos de tamanhos das matrizes a serem geradas */ 
-    int tamanhos[] = {32, 64, 128, 256, 512, 640, 768, 896, 1024, 1536};
-    int n, i, j, par;
-    int **a;
-    
-    struct timeval tv;
-    double start_t, end_t, tempo_gasto;
-    
-    /* aloca espaco para a matriz a */
-    /* MAX eh inicializado com um dos tamanhos do vetor acima */
-    
-    int **a =   calloc(MAX, sizeof(int* ));
-    for(i=0; i< MAX; i++)
-        a[i] = calloc(MAX, sizeof(int *));
-    
-    /* inicializa a matriz */
-    
-   
-    /* exemplo de como calcular o tempo de execução somente do trecho
-     * especifico que faz a operacao com as matrizes 
-     */
-    printf("===========  Iniciando execucao ============\n");            
-    gettimeofday(&tv, NULL);
-    start_t = (double) tv.tv_sec + (double)tv.tv_usec / 1000000.0;
-    for(i = 0; i < n; i++)
-        for(j = 0; j < n; j++)
-            if ( a[i][j] % 2 == 0)
-                par += 1;
-            gettimeofday(&tv,NULL); 
-        end_t = (double) tv.tv_sec + (double) tv.tv_usec / 1000000.0;
-    tempo_gasto = end_t - start_t;
-    printf(" %d pares, tempo %f usecs\n", par,tempo_gasto);
-    
+    printf("MULTIPLYING MATRICES OF SIZE %d x %d: ", sizes[i], sizes[i]);
+
+    /* start stopwatch */
+    gettimeofday(&startedAt, NULL);
+
+    /* do the magic */
+    matrixMultiply(&a, &b, &result);
+
+    /* calculate total microseconds */
+    gettimeofday(&endedAt, NULL);
+    spentMicroseconds = ((endedAt.tv_sec * 1000000 + endedAt.tv_usec) -
+                         (startedAt.tv_sec * 1000000 + startedAt.tv_usec));
+
+    printf("spent %lf seconds\n", (double)spentMicroseconds / 1e+6);
+
+    /* destroy allocated memory */
+    matrixDestroy(&a);
+    matrixDestroy(&b);
+    matrixDestroy(&result);
+  }
+
+  return EXIT_SUCCESS;
 }
